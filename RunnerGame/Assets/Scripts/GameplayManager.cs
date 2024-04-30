@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class GameplayManager : MonoBehaviour
@@ -10,6 +11,10 @@ public class GameplayManager : MonoBehaviour
     private Vector2 _gapSizeRange, _heightDifferenceRange, _carSpawnTimeRange, _droneSpawnTimeRange;
     [SerializeField]
     private Rooftop[] _rooftopPrefabs;
+    [SerializeField]
+    private TMP_Text _scoreText;
+    [SerializeField]
+    private GameOverPanel _gameOverPanel;
     [SerializeField]
     private Rooftop _startingRooftop;
     [SerializeField]
@@ -23,13 +28,15 @@ public class GameplayManager : MonoBehaviour
 
     List<Rigidbody2D> _movedBodies;
 
-    private float _targetGapSize, _currentGapSize, _currentSpeed, _lastRooftopHeight, _currentCarSpawnTime = 5f, _currentDroneSpawnTime = 10f;
+    private float _targetGapSize, _currentGapSize, _currentSpeed, _lastRooftopHeight, _score, _currentCarSpawnTime = 5f, _currentDroneSpawnTime = 10f;
     private Rooftop _nextRooftop;
     private Rigidbody2D _currentIteratedRigidbody;
     private int _roofsIterationIndex;
+    private bool _gameOver;
 
     private void Awake()
     {
+        _player.OnDied += StopGame;
         _movedBodies = new List<Rigidbody2D>() {_startingRooftop.Rigidbody};
         _nextRooftop = _rooftopPrefabs[Random.Range(0, _rooftopPrefabs.Length)];
         _currentSpeed = _startingSpeed;
@@ -37,6 +44,9 @@ public class GameplayManager : MonoBehaviour
 
     private void Update()
     {
+        if (_gameOver)
+            return;
+        _scoreText.text = $"Distance\n" + Mathf.RoundToInt(_score += Time.deltaTime * _currentSpeed) + "m";
         if ((_currentCarSpawnTime -= Time.deltaTime) <= 0f)
         {
             _currentCarSpawnTime = Random.Range(_carSpawnTimeRange.x, _carSpawnTimeRange.y);
@@ -57,12 +67,14 @@ public class GameplayManager : MonoBehaviour
 
     private void FixedUpdate()
     {
+        if (_gameOver)
+            return;
         if ((_currentGapSize += Time.fixedDeltaTime * _currentSpeed) >= _targetGapSize)
         {
-            _targetGapSize = Random.Range(_gapSizeRange.x, _gapSizeRange.y);
+            _targetGapSize = Random.Range(_gapSizeRange.x, _gapSizeRange.y) + _nextRooftop.Width * .5f;
             _currentGapSize = 0f;
             _currentSpeed = Mathf.Min(_currentSpeed + _speedIncreasePerRoof, _maxSpeed);
-            _lastRooftopHeight = Random.Range(Mathf.Clamp(_lastRooftopHeight + _heightDifferenceRange.x, -4f, 2f), 
+            _lastRooftopHeight = Random.Range(Mathf.Clamp(_lastRooftopHeight + _heightDifferenceRange.x, -3f, 3f), 
                 Mathf.Clamp(_lastRooftopHeight + _heightDifferenceRange.y, -4f, 2f));
             var rooftop = Instantiate(_nextRooftop, new Vector2(CameraManager.instance.HalfWidth + _nextRooftop.Width * .5f, _lastRooftopHeight), Quaternion.identity);
             _movedBodies.Add(rooftop.Rigidbody);
@@ -86,5 +98,13 @@ public class GameplayManager : MonoBehaviour
             }
         }
         _roofsIterationIndex = 0;
+    }
+
+    private void StopGame()
+    {
+        _gameOver = true;
+        _score = Mathf.Round(_score);
+        _gameOverPanel.Show((int)_score);
+        GameManager.instance.Score = (int)_score;
     }
 }

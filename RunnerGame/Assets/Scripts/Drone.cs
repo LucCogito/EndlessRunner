@@ -22,7 +22,7 @@ public class Drone : MonoBehaviour
 
     private void Update()
     {
-        if ((_currentShotDelay -= Time.deltaTime) <= 0)
+        if ((_currentShotDelay -= Time.deltaTime) <= 0 && _player != null)
         {
             _currentShotDelay = Random.Range(_shotDelayRange.x, _shotDelayRange.y);
             Instantiate(_projectilePrefab, transform.position, Quaternion.identity).up = _player.transform.position - transform.position;

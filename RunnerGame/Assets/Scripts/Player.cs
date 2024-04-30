@@ -2,12 +2,13 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class Player : MonoBehaviour
 {
     [SerializeField]
     private Rigidbody2D _rigidbody;
+    [SerializeField]
+    private Animator _animator;
     [SerializeField]
     private float _maxSpeed, _acceleration, _jumpPower, _glidingGravity, _fallingGravity, _climbingAcceleration, _climbingMaxSpeed, _tasedTime;
     [SerializeField]
@@ -18,13 +19,20 @@ public class Player : MonoBehaviour
     private float _jumpDisableTimeAfterClimbing = .3f;
 
     private Vector2 _inputDirection, _previousInputDirection, _groundOverlapPoint, _wallLeftOverlapPoint, _wallRightOverlapPoint;
-    private float _accelerationTick, _horizontalVelocity, _currentJumpDisableTimeAfterClimbing, _recoverFromTasedTime;
-    private bool _isDeaccelerating, _isClimbing;
+    private float _accelerationTick, _horizontalVelocity, _currentJumpDisableTimeAfterClimbing, _currentTasedTime;
+    private bool _isDeaccelerating, _isClimbing, _isGrounded, _isTased;
+
+    public event Action OnDied;
 
     private void Update()
     {
-        if (_recoverFromTasedTime > Time.time)
-            return;
+        if (_isTased)
+        {
+            if ((_currentTasedTime -= Time.deltaTime) > 0f)
+                return;
+            else
+                _animator.SetBool("Tased", _isTased = false);
+        }
         _previousInputDirection = _inputDirection;
         _inputDirection.x = Input.GetAxis("Horizontal");
         if (_currentJumpDisableTimeAfterClimbing > 0)
@@ -34,6 +42,7 @@ public class Player : MonoBehaviour
         }
         else
             _inputDirection.y = Input.GetAxis("Vertical");
+        _animator.SetFloat("InputY", _inputDirection.y);
     }
 
     private void FixedUpdate()
@@ -43,13 +52,16 @@ public class Player : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        SceneManager.LoadScene(0);
+        OnDied?.Invoke();
+        Destroy(gameObject);
     }
 
     public void GetTased()
     {
         _inputDirection = _previousInputDirection = Vector2.zero;
-        _recoverFromTasedTime = Time.time + _tasedTime;
+        _currentTasedTime = _tasedTime;
+        _animator.SetFloat("InputY", _inputDirection.y);
+        _animator.SetBool("Tased", _isTased = true);
     }
 
     private void Move()
@@ -78,12 +90,13 @@ public class Player : MonoBehaviour
 
     private Vector2 CalculateJump(Vector2 newVelocity)
     {
+        _groundOverlapPoint = _groundedCastPoint + _rigidbody.position;
+        _isGrounded = Physics2D.OverlapArea(_groundOverlapPoint - _groundCheckSize * .5f, _groundOverlapPoint + _groundCheckSize * .5f, _jumpLayer) != null;
+        _animator.SetBool("Grounded", _isGrounded);
         if (_inputDirection.y > 0f)
         {
-            _groundOverlapPoint = _groundedCastPoint + _rigidbody.position;
             _rigidbody.gravityScale = _glidingGravity;
-            if (_previousInputDirection.y <= _inputDirection.y &&
-                Physics2D.OverlapArea(_groundOverlapPoint - _groundCheckSize * .5f, _groundOverlapPoint + _groundCheckSize * .5f, _jumpLayer) != null)
+            if (_previousInputDirection.y <= _inputDirection.y && _isGrounded)
                 return new Vector2(newVelocity.x, _jumpPower);
             else
             {
