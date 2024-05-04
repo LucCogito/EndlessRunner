@@ -25,7 +25,7 @@ public class Drone : MonoBehaviour
         if ((_currentShotDelay -= Time.deltaTime) <= 0 && _player != null)
         {
             _currentShotDelay = Random.Range(_shotDelayRange.x, _shotDelayRange.y);
-            Instantiate(_projectilePrefab, transform.position, Quaternion.identity).up = _player.transform.position - transform.position;
+            Instantiate(_projectilePrefab, transform.position, Quaternion.identity).right = _player.transform.position - transform.position;
         }
     }
 

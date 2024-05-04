@@ -5,6 +5,9 @@ using UnityEngine.SceneManagement;
 
 public class GameManager : Singleton<GameManager>
 {
+    [SerializeField]
+    private AudioSource[] _audioSources;
+
     public int Score
     {
         get => _score;
@@ -24,8 +27,18 @@ public class GameManager : Singleton<GameManager>
             _score = PlayerPrefs.GetInt("score");
     }
 
+    public void ChangeVolume(float value)
+    {
+        foreach (var audioSource in _audioSources)
+            audioSource.volume = value;
+    }
+
+    public float GetVolume() => _audioSources[0].volume;
+
     public void LoadScene(int sceneIndex)
     {
         SceneManager.LoadScene(sceneIndex);
+        _audioSources[(sceneIndex+1)%2].Stop();
+        _audioSources[sceneIndex].Play();
     }
 }

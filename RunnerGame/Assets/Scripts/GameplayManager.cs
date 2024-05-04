@@ -1,7 +1,9 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class GameplayManager : MonoBehaviour
 {
@@ -28,11 +30,13 @@ public class GameplayManager : MonoBehaviour
 
     List<Rigidbody2D> _movedBodies;
 
-    private float _targetGapSize, _currentGapSize, _currentSpeed, _lastRooftopHeight, _score, _currentCarSpawnTime = 5f, _currentDroneSpawnTime = 10f;
+    private float _targetGapSize, _currentGapSize, _currentSpeed, _lastRooftopHeight, _score, _currentCarSpawnTime = 15f, _currentDroneSpawnTime = 30f;
     private Rooftop _nextRooftop;
     private Rigidbody2D _currentIteratedRigidbody;
     private int _roofsIterationIndex;
     private bool _gameOver;
+
+    public event Action OnSpeedIncreased, OnStopGame;
 
     private void Awake()
     {
@@ -73,7 +77,11 @@ public class GameplayManager : MonoBehaviour
         {
             _targetGapSize = Random.Range(_gapSizeRange.x, _gapSizeRange.y) + _nextRooftop.Width * .5f;
             _currentGapSize = 0f;
-            _currentSpeed = Mathf.Min(_currentSpeed + _speedIncreasePerRoof, _maxSpeed);
+            if (_currentSpeed < _maxSpeed)
+            {
+                _currentSpeed = Mathf.Min(_currentSpeed + _speedIncreasePerRoof, _maxSpeed);
+                OnSpeedIncreased?.Invoke();
+            }
             _lastRooftopHeight = Random.Range(Mathf.Clamp(_lastRooftopHeight + _heightDifferenceRange.x, -3f, 3f), 
                 Mathf.Clamp(_lastRooftopHeight + _heightDifferenceRange.y, -4f, 2f));
             var rooftop = Instantiate(_nextRooftop, new Vector2(CameraManager.instance.HalfWidth + _nextRooftop.Width * .5f, _lastRooftopHeight), Quaternion.identity);
@@ -106,5 +114,6 @@ public class GameplayManager : MonoBehaviour
         _score = Mathf.Round(_score);
         _gameOverPanel.Show((int)_score);
         GameManager.instance.Score = (int)_score;
+        OnStopGame?.Invoke();
     }
 }

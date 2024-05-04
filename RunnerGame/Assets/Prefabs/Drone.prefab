@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 3529710354563479243}
   - component: {fileID: 431368231760469486}
   - component: {fileID: -1745530814337244067}
+  - component: {fileID: 3383737293749903849}
   m_Layer: 0
   m_Name: Drone
   m_TagString: Untagged
@@ -75,7 +76,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: -1
-  m_Sprite: {fileID: -2413806693520163455, guid: a86470a33a6bf42c4b3595704624658b, type: 3}
+  m_Sprite: {fileID: 934169726, guid: e82862765194f2846a2547aca59f9a98, type: 3}
   m_Color: {r: 0.946922, g: 0.48584908, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -128,3 +129,24 @@ MonoBehaviour:
   <Rigidbody>k__BackingField: {fileID: 431368231760469486}
   _shotDelayRange: {x: 2, y: 4}
   _projectilePrefab: {fileID: 5593674833587307759, guid: ff3cce010f9daa94483515642410303c, type: 3}
+--- !u!95 &3383737293749903849
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8044754530562344300}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: a4d6569cecb86184e8f8e3cfb25f210a, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0

@@ -11,7 +11,7 @@ public class DroneProjectile : MonoBehaviour
 
     private void FixedUpdate()
     {
-        _rigidbody.MovePosition(_rigidbody.position + (Vector2)transform.up * _speed * Time.fixedDeltaTime);
+        _rigidbody.MovePosition(_rigidbody.position + (Vector2)transform.right * _speed * Time.fixedDeltaTime);
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
